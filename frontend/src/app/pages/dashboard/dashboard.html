@@ -6,7 +6,11 @@
     </button>
   </div>
 
-  @if (groups.length === 0) {
+  @if (store.loading()) {
+    <div class="loading"><mat-spinner diameter="40" /></div>
+  }
+
+  @if (!store.loading() && store.groups().length === 0) {
     <mat-card class="empty-state">
       <mat-card-content>
         <mat-icon class="empty-icon">group</mat-icon>
@@ -16,7 +20,7 @@
   }
 
   <div class="group-list">
-    @for (group of groups; track group.id) {
+    @for (group of store.groups(); track group.id) {
       <mat-card class="group-card" (click)="openGroup(group)">
         <mat-card-header>
           <mat-card-title>{{ group.name }}</mat-card-title>
@@ -26,7 +30,7 @@
           <mat-chip-set>
             <mat-chip>
               <mat-icon matChipAvatar>group</mat-icon>
-              {{ getMemberCount(group) }} Mitglieder
+              {{ group.members.length }} Mitglieder
             </mat-chip>
           </mat-chip-set>
         </mat-card-content>

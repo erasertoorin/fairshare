@@ -8,21 +8,22 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ApiService } from '../../services/api.service';
 import { AuthService } from '../../services/auth.service';
-import { Group, User, GroupRole } from '../../models/api.models';
+import { GroupStore } from '../../services/group.store';
+import { Group, GroupRole } from '../../models/api.models';
+
 @Component({
   selector: 'app-dashboard',
-  imports: [MatCardModule, MatButtonModule, MatIconModule, MatChipsModule, MatDialogModule],
+  imports: [MatCardModule, MatButtonModule, MatIconModule, MatChipsModule, MatDialogModule, MatProgressSpinnerModule],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })
 export class DashboardPage implements OnInit {
-  groups: Group[] = [];
-
   constructor(
-    private api: ApiService,
     protected auth: AuthService,
+    protected store: GroupStore,
     private router: Router,
     private dialog: MatDialog,
   ) {}
@@ -32,14 +33,7 @@ export class DashboardPage implements OnInit {
       this.router.navigate(['/login']);
       return;
     }
-    this.loadGroups();
-  }
-
-  loadGroups(): void {
-    const userId = this.auth.currentUserId();
-    if (userId) {
-      this.api.getGroups(userId).subscribe(groups => this.groups = groups);
-    }
+    this.store.loadGroups();
   }
 
   openGroup(group: Group): void {
@@ -49,16 +43,11 @@ export class DashboardPage implements OnInit {
   openCreateGroup(): void {
     const ref = this.dialog.open(CreateGroupDialog, { width: '450px' });
     ref.afterClosed().subscribe(result => {
-      if (result) this.loadGroups();
+      if (result) this.store.loadGroups();
     });
-  }
-
-  getMemberCount(group: Group): number {
-    return group.members.length;
   }
 }
 
-// Create Group Dialog
 @Component({
   selector: 'app-create-group-dialog',
   imports: [FormsModule, MatCardModule, MatButtonModule, MatFormFieldModule, MatInputModule, MatDialogModule],
@@ -97,8 +86,6 @@ export class CreateGroupDialog {
       name: this.name,
       description: this.description,
       members: [{ userId, role: GroupRole.ADMIN }],
-    }).subscribe(() => {
-      this.dialogRef.close(true);
-    });
+    }).subscribe(() => this.dialogRef.close(true));
   }
 }

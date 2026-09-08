@@ -7,13 +7,13 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
-import { ApiService } from '../../services/api.service';
 import { AuthService } from '../../services/auth.service';
-import { GroupDetail, ExpenseCategory } from '../../models/api.models';
+import { GroupDetail, ExpenseCategory, Expense } from '../../models/api.models';
 
-export interface AddExpenseDialogData {
+export interface ExpenseDialogData {
   group: GroupDetail;
   categories: ExpenseCategory[];
+  expense?: Expense; // if set, we're editing
 }
 
 @Component({
@@ -23,21 +23,27 @@ export interface AddExpenseDialogData {
   styleUrl: './add-expense-dialog.scss',
 })
 export class AddExpenseDialog {
-  description = '';
-  amount: number | null = null;
+  description: string;
+  amount: number | null;
   paidBy: string;
-  categoryId = 'cat1';
+  categoryId: string;
   splitSelection: Record<string, boolean> = {};
+  isEditMode: boolean;
 
   constructor(
-    @Inject(MAT_DIALOG_DATA) public data: AddExpenseDialogData,
+    @Inject(MAT_DIALOG_DATA) public data: ExpenseDialogData,
     private dialogRef: MatDialogRef<AddExpenseDialog>,
-    private api: ApiService,
     private auth: AuthService,
   ) {
-    this.paidBy = this.auth.currentUserId() ?? '';
+    this.isEditMode = !!data.expense;
+    const e = data.expense;
+    this.description = e?.description ?? '';
+    this.amount = e?.amount ?? null;
+    this.paidBy = e?.paidBy ?? this.auth.currentUserId() ?? '';
+    this.categoryId = e?.categoryId ?? 'cat1';
+
     for (const m of data.group.memberDetails) {
-      this.splitSelection[m.userId] = true;
+      this.splitSelection[m.userId] = e ? e.splitBetween.includes(m.userId) : true;
     }
   }
 
@@ -57,12 +63,12 @@ export class AddExpenseDialog {
 
   save(): void {
     if (!this.isValid || !this.amount) return;
-    this.api.createExpense(this.data.group.id, {
+    this.dialogRef.close({
       description: this.description,
       amount: this.amount,
       paidBy: this.paidBy,
       splitBetween: this.splitBetween,
       categoryId: this.categoryId,
-    }).subscribe(() => this.dialogRef.close(true));
+    });
   }
 }

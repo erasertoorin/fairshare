@@ -8,30 +8,27 @@ import { MatListModule } from '@angular/material/list';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { forkJoin } from 'rxjs';
-import { ApiService } from '../../services/api.service';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../services/auth.service';
-import { GroupDetail, Expense, Balance, User, ExpenseCategory } from '../../models/api.models';
+import { GroupStore } from '../../services/group.store';
+import { Expense } from '../../models/api.models';
 import { AddExpenseDialog } from '../../components/add-expense-dialog/add-expense-dialog';
+import { AddMemberDialog } from '../../components/add-member-dialog/add-member-dialog';
 
 @Component({
   selector: 'app-group-detail',
-  imports: [CurrencyPipe, DatePipe, MatCardModule, MatButtonModule, MatIconModule, MatListModule, MatTabsModule, MatChipsModule, MatDialogModule],
+  imports: [CurrencyPipe, DatePipe, MatCardModule, MatButtonModule, MatIconModule, MatListModule, MatTabsModule, MatChipsModule, MatDialogModule, MatProgressSpinnerModule],
   templateUrl: './group-detail.html',
   styleUrl: './group-detail.scss',
 })
 export class GroupDetailPage implements OnInit {
-  group: GroupDetail | null = null;
-  expenses: Expense[] = [];
-  balances: Balance[] = [];
-  categories: ExpenseCategory[] = [];
-  private usersMap = new Map<string, User>();
+  private groupId = '';
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private api: ApiService,
     protected auth: AuthService,
+    protected store: GroupStore,
     private dialog: MatDialog,
   ) {}
 
@@ -40,37 +37,8 @@ export class GroupDetailPage implements OnInit {
       this.router.navigate(['/login']);
       return;
     }
-    const groupId = this.route.snapshot.paramMap.get('id');
-    if (groupId) this.loadGroup(groupId);
-  }
-
-  loadGroup(groupId: string): void {
-    forkJoin({
-      group: this.api.getGroup(groupId),
-      expenses: this.api.getExpenses(groupId),
-      balances: this.api.getBalances(groupId),
-      categories: this.api.getCategories(),
-    }).subscribe(({ group, expenses, balances, categories }) => {
-      this.group = group;
-      this.expenses = expenses.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-      this.balances = balances;
-      this.categories = categories;
-      for (const m of group.memberDetails) {
-        this.usersMap.set(m.userId, m.user);
-      }
-    });
-  }
-
-  getUserName(userId: string): string {
-    return this.usersMap.get(userId)?.name ?? 'Unbekannt';
-  }
-
-  getUserColor(userId: string): string {
-    return this.usersMap.get(userId)?.avatarColor ?? '#9E9E9E';
-  }
-
-  getCategoryIcon(categoryId: string): string {
-    return this.categories.find(c => c.id === categoryId)?.icon ?? 'receipt';
+    this.groupId = this.route.snapshot.paramMap.get('id') ?? '';
+    if (this.groupId) this.store.loadGroupDetail(this.groupId);
   }
 
   getSharePerPerson(expense: Expense): number {
@@ -78,13 +46,38 @@ export class GroupDetailPage implements OnInit {
   }
 
   openAddExpense(): void {
-    if (!this.group) return;
+    const group = this.store.currentGroup();
+    if (!group) return;
     const ref = this.dialog.open(AddExpenseDialog, {
       width: '450px',
-      data: { group: this.group, categories: this.categories },
+      data: { group, categories: this.store.categories() },
     });
     ref.afterClosed().subscribe(result => {
-      if (result && this.group) this.loadGroup(this.group.id);
+      if (result) this.store.addExpense(this.groupId, result);
+    });
+  }
+
+  openEditExpense(expense: Expense): void {
+    const group = this.store.currentGroup();
+    if (!group) return;
+    const ref = this.dialog.open(AddExpenseDialog, {
+      width: '450px',
+      data: { group, categories: this.store.categories(), expense },
+    });
+    ref.afterClosed().subscribe(result => {
+      if (result) this.store.editExpense(expense.id, this.groupId, result);
+    });
+  }
+
+  openAddMember(): void {
+    const group = this.store.currentGroup();
+    if (!group) return;
+    const ref = this.dialog.open(AddMemberDialog, {
+      width: '400px',
+      data: { group },
+    });
+    ref.afterClosed().subscribe(result => {
+      if (result) this.store.loadGroupDetail(this.groupId);
     });
   }
 

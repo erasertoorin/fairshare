@@ -38,6 +38,10 @@ export class ApiService {
     return this.http.post<Group>(`${this.baseUrl}/groups`, data, { headers: this.headers });
   }
 
+  updateGroup(id: string, data: Partial<Group>): Observable<Group> {
+    return this.http.put<Group>(`${this.baseUrl}/groups/${id}`, data, { headers: this.headers });
+  }
+
   // Categories
   getCategories(): Observable<ExpenseCategory[]> {
     return this.http.get<ExpenseCategory[]>(`${this.baseUrl}/categories`);
@@ -57,6 +61,10 @@ export class ApiService {
     date?: string;
   }): Observable<Expense> {
     return this.http.post<Expense>(`${this.baseUrl}/groups/${groupId}/expenses`, data, { headers: this.headers });
+  }
+
+  updateExpense(id: string, data: Partial<Expense>): Observable<Expense> {
+    return this.http.put<Expense>(`${this.baseUrl}/expenses/${id}`, data, { headers: this.headers });
   }
 
   deleteExpense(id: string): Observable<void> {
