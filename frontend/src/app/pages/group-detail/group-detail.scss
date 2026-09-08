@@ -33,6 +33,21 @@
   font-size: 18px;
 }
 
+.balance-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid #eee;
+
+  .balance-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    .balance-name { font-weight: 500; }
+  }
+}
+
 .positive { color: #4CAF50; font-weight: 500; }
 .negative { color: #F44336; font-weight: 500; }
 
@@ -64,6 +79,13 @@
   display: flex;
   justify-content: center;
   padding: 48px;
+}
+
+.all-settled {
+  text-align: center;
+  padding: 24px;
+  color: #4CAF50;
+  font-weight: 500;
 }
 
 .add-member-btn {

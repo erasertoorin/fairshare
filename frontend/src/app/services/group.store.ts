@@ -1,5 +1,5 @@
 import { Injectable, computed, signal } from '@angular/core';
-import { Subject, switchMap, tap, catchError, EMPTY, forkJoin, shareReplay, BehaviorSubject } from 'rxjs';
+import { Subject, switchMap, tap, catchError, EMPTY, forkJoin } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ApiService } from './api.service';
 import { AuthService } from './auth.service';
@@ -36,15 +36,17 @@ export class GroupStore {
       tap(() => this.loading.set(true)),
       switchMap(() => {
         const userId = this.auth.currentUserId();
-        return userId ? this.api.getGroups(userId) : EMPTY;
-      }),
-      tap(groups => {
-        this.groups.set(groups);
-        this.loading.set(false);
-      }),
-      catchError(() => {
-        this.loading.set(false);
-        return EMPTY;
+        if (!userId) return EMPTY;
+        return this.api.getGroups(userId).pipe(
+          tap(groups => {
+            this.groups.set(groups);
+            this.loading.set(false);
+          }),
+          catchError(() => {
+            this.loading.set(false);
+            return EMPTY;
+          }),
+        );
       }),
       takeUntilDestroyed(),
     ).subscribe();
@@ -52,23 +54,26 @@ export class GroupStore {
     // Load group detail stream
     this.loadGroupDetail$.pipe(
       tap(() => this.loading.set(true)),
-      switchMap(groupId => forkJoin({
-        group: this.api.getGroup(groupId),
-        expenses: this.api.getExpenses(groupId),
-        balances: this.api.getBalances(groupId),
-        categories: this.api.getCategories(),
-      })),
-      tap(({ group, expenses, balances, categories }) => {
-        this.currentGroup.set(group);
-        this.expenses.set(expenses);
-        this.balances.set(balances);
-        this.categories.set(categories);
-        this.loading.set(false);
-      }),
-      catchError(() => {
-        this.loading.set(false);
-        return EMPTY;
-      }),
+      switchMap(groupId =>
+        forkJoin({
+          group: this.api.getGroup(groupId),
+          expenses: this.api.getExpenses(groupId),
+          balances: this.api.getBalances(groupId),
+          categories: this.api.getCategories(),
+        }).pipe(
+          tap(({ group, expenses, balances, categories }) => {
+            this.currentGroup.set(group);
+            this.expenses.set(expenses);
+            this.balances.set(balances);
+            this.categories.set(categories);
+            this.loading.set(false);
+          }),
+          catchError(() => {
+            this.loading.set(false);
+            return EMPTY;
+          }),
+        )
+      ),
       takeUntilDestroyed(),
     ).subscribe();
 
@@ -76,7 +81,6 @@ export class GroupStore {
     this.addExpense$.pipe(
       switchMap(({ groupId, data }) =>
         this.api.createExpense(groupId, data).pipe(
-          // After creating, reload the group detail
           switchMap(() => forkJoin({
             expenses: this.api.getExpenses(groupId),
             balances: this.api.getBalances(groupId),
@@ -85,9 +89,9 @@ export class GroupStore {
             this.expenses.set(expenses);
             this.balances.set(balances);
           }),
+          catchError(() => EMPTY),
         )
       ),
-      catchError(() => EMPTY),
       takeUntilDestroyed(),
     ).subscribe();
 
@@ -103,9 +107,9 @@ export class GroupStore {
             this.expenses.set(expenses);
             this.balances.set(balances);
           }),
+          catchError(() => EMPTY),
         )
       ),
-      catchError(() => EMPTY),
       takeUntilDestroyed(),
     ).subscribe();
   }

@@ -17,7 +17,7 @@ export interface AddMemberDialogData {
   selector: 'app-add-member-dialog',
   imports: [FormsModule, MatDialogModule, MatFormFieldModule, MatSelectModule, MatButtonModule, MatIconModule],
   template: `
-    <h2 mat-dialog-title>Mitglied hinzufuegen</h2>
+    <h2 mat-dialog-title>Mitglied hinzufügen</h2>
     <mat-dialog-content>
       <mat-form-field appearance="outline" style="width:100%">
         <mat-label>User</mat-label>

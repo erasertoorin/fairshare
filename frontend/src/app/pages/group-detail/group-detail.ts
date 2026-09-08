@@ -9,11 +9,13 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { ApiService } from '../../services/api.service';
 import { AuthService } from '../../services/auth.service';
 import { GroupStore } from '../../services/group.store';
-import { Expense } from '../../models/api.models';
+import { Balance, Expense } from '../../models/api.models';
 import { AddExpenseDialog } from '../../components/add-expense-dialog/add-expense-dialog';
 import { AddMemberDialog } from '../../components/add-member-dialog/add-member-dialog';
+import { PaymentDialog } from '../../components/payment-dialog/payment-dialog';
 
 @Component({
   selector: 'app-group-detail',
@@ -27,6 +29,7 @@ export class GroupDetailPage implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
+    private api: ApiService,
     protected auth: AuthService,
     protected store: GroupStore,
     private dialog: MatDialog,
@@ -43,6 +46,38 @@ export class GroupDetailPage implements OnInit {
 
   getSharePerPerson(expense: Expense): number {
     return expense.amount / expense.splitBetween.length;
+  }
+
+  hasOpenBalances(): boolean {
+    return this.store.balances().some(b => b.balance > 0.01 || b.balance < -0.01);
+  }
+
+  isCurrentUser(userId: string): boolean {
+    return userId === this.auth.currentUserId();
+  }
+
+  showPayButton(balance: Balance): boolean {
+    return balance.balance < -0.01 && !this.isCurrentUser(balance.user.id);
+  }
+
+  openPaymentDialog(balance: Balance): void {
+    const ref = this.dialog.open(PaymentDialog, {
+      width: '400px',
+      data: {
+        fromUserName: balance.user.name,
+        fromUserId: balance.user.id,
+        totalOwed: Math.round(-balance.balance * 100) / 100,
+      },
+    });
+    ref.afterClosed().subscribe(amount => {
+      if (amount && this.groupId) {
+        this.api.createPayment(this.groupId, {
+          fromUser: balance.user.id,
+          toUser: this.auth.currentUserId()!,
+          amount,
+        }).subscribe(() => this.store.loadGroupDetail(this.groupId));
+      }
+    });
   }
 
   openAddExpense(): void {
