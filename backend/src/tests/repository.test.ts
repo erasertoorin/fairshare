@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { users, groups, categories, expenses, settlements, calculateBalances, simplifyDebts } from "../repository.js";
+import { users, groups, categories, expenses, payments, calculateBalances, simplifyDebts } from "../repository.js";
+import { GroupRole } from "../models.js";
 
 // ─── Users ───────────────────────────────────────────────
 
@@ -78,9 +79,9 @@ describe("groups", () => {
 
   describe("roles & permissions", () => {
     it("should return correct member role", () => {
-      expect(groups.getMemberRole("g1", "u1")).toBe("admin");
-      expect(groups.getMemberRole("g1", "u2")).toBe("editor");
-      expect(groups.getMemberRole("g1", "u3")).toBe("viewer");
+      expect(groups.getMemberRole("g1", "u1")).toBe(GroupRole.ADMIN);
+      expect(groups.getMemberRole("g1", "u2")).toBe(GroupRole.EDITOR);
+      expect(groups.getMemberRole("g1", "u3")).toBe(GroupRole.VIEWER);
     });
 
     it("should return null for non-member", () => {
@@ -92,25 +93,25 @@ describe("groups", () => {
     });
 
     it("should check admin has all permissions", () => {
-      expect(groups.hasPermission("g1", "u1", "admin")).toBe(true);
-      expect(groups.hasPermission("g1", "u1", "editor")).toBe(true);
-      expect(groups.hasPermission("g1", "u1", "viewer")).toBe(true);
+      expect(groups.hasPermission("g1", "u1", GroupRole.ADMIN)).toBe(true);
+      expect(groups.hasPermission("g1", "u1", GroupRole.EDITOR)).toBe(true);
+      expect(groups.hasPermission("g1", "u1", GroupRole.VIEWER)).toBe(true);
     });
 
     it("should check editor has editor and viewer permissions", () => {
-      expect(groups.hasPermission("g1", "u2", "admin")).toBe(false);
-      expect(groups.hasPermission("g1", "u2", "editor")).toBe(true);
-      expect(groups.hasPermission("g1", "u2", "viewer")).toBe(true);
+      expect(groups.hasPermission("g1", "u2", GroupRole.ADMIN)).toBe(false);
+      expect(groups.hasPermission("g1", "u2", GroupRole.EDITOR)).toBe(true);
+      expect(groups.hasPermission("g1", "u2", GroupRole.VIEWER)).toBe(true);
     });
 
     it("should check viewer only has viewer permission", () => {
-      expect(groups.hasPermission("g1", "u3", "admin")).toBe(false);
-      expect(groups.hasPermission("g1", "u3", "editor")).toBe(false);
-      expect(groups.hasPermission("g1", "u3", "viewer")).toBe(true);
+      expect(groups.hasPermission("g1", "u3", GroupRole.ADMIN)).toBe(false);
+      expect(groups.hasPermission("g1", "u3", GroupRole.EDITOR)).toBe(false);
+      expect(groups.hasPermission("g1", "u3", GroupRole.VIEWER)).toBe(true);
     });
 
     it("should deny permission for non-member", () => {
-      expect(groups.hasPermission("g1", "u4", "viewer")).toBe(false);
+      expect(groups.hasPermission("g1", "u4", GroupRole.VIEWER)).toBe(false);
     });
   });
 
@@ -118,7 +119,7 @@ describe("groups", () => {
     const group = groups.create({
       name: "Test Group",
       description: "test",
-      members: [{ userId: "u1", role: "admin" }],
+      members: [{ userId: "u1", role: GroupRole.ADMIN }],
     });
     expect(group.id).toBeDefined();
     expect(group.createdAt).toBeDefined();
@@ -173,7 +174,6 @@ describe("expenses", () => {
       currency: "EUR",
       paidBy: "u1",
       splitBetween: ["u1", "u2"],
-      splitType: "equal",
       categoryId: "cat1",
       date: new Date().toISOString(),
     });
@@ -190,22 +190,22 @@ describe("expenses", () => {
 
 // ─── Settlements ─────────────────────────────────────────
 
-describe("settlements", () => {
-  it("should return settlements by group", () => {
-    const g1Settlements = settlements.getByGroup("g1");
+describe("payments", () => {
+  it("should return payments by group", () => {
+    const g1Settlements = payments.getByGroup("g1");
     expect(g1Settlements.length).toBeGreaterThanOrEqual(1);
   });
 
-  it("should create a settlement", () => {
-    const settlement = settlements.create({
+  it("should create a payment", () => {
+    const payment = payments.create({
       groupId: "g1",
       fromUser: "u2",
       toUser: "u1",
       amount: 5.0,
       date: new Date().toISOString(),
     });
-    expect(settlement.id).toBeDefined();
-    expect(settlement.amount).toBe(5.0);
+    expect(payment.id).toBeDefined();
+    expect(payment.amount).toBe(5.0);
   });
 });
 

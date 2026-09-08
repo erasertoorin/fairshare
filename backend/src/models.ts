@@ -7,7 +7,11 @@ export interface User {
   avatarColor: string;
 }
 
-export type GroupRole = "admin" | "editor" | "viewer";
+export enum GroupRole {
+  VIEWER = 1,
+  EDITOR = 2,
+  ADMIN = 3,
+}
 
 export interface GroupMember {
   userId: UserId;
@@ -21,8 +25,6 @@ export interface Group {
   members: GroupMember[];
   createdAt: string;
 }
-
-export type SplitType = "equal" | "exact" | "percentage";
 
 export interface ExpenseCategory {
   id: string;
@@ -38,13 +40,12 @@ export interface Expense {
   currency: string;
   paidBy: UserId;
   splitBetween: UserId[];
-  splitType: SplitType;
   categoryId: string;
   date: string;
   createdAt: string;
 }
 
-export interface Settlement {
+export interface Payment {
   id: string;
   groupId: string;
   fromUser: UserId;
@@ -70,5 +71,5 @@ export interface Database {
   groups: Group[];
   categories: ExpenseCategory[];
   expenses: Expense[];
-  settlements: Settlement[];
+  payments: Payment[];
 }

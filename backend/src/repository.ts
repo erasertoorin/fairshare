@@ -1,4 +1,4 @@
-import type { User, Group, GroupRole, ExpenseCategory, Expense, Settlement, Database } from "./models.js";
+import type { User, Group, GroupRole, ExpenseCategory, Expense, Payment, Database } from "./models.js";
 import { seedData } from "./seed-data.js";
 
 // Deep clone seed data so we can reset if needed
@@ -42,7 +42,7 @@ export const users = {
     return findById(db.users, id);
   },
   create(data: Omit<User, "id">): User {
-    const user: User = { id: createId(), ...data };
+    const user: User = { ...data, id: createId() };
     db.users.push(user);
     return user;
   },
@@ -75,11 +75,10 @@ export const groups = {
   hasPermission(groupId: string, userId: string, minRole: GroupRole): boolean {
     const role = groups.getMemberRole(groupId, userId);
     if (!role) return false;
-    const hierarchy: Record<GroupRole, number> = { admin: 3, editor: 2, viewer: 1 };
-    return hierarchy[role] >= hierarchy[minRole];
+    return role >= minRole;
   },
   create(data: Omit<Group, "id" | "createdAt">): Group {
-    const group: Group = { id: createId(), createdAt: now(), ...data };
+    const group: Group = { ...data, id: createId(), createdAt: now() };
     db.groups.push(group);
     return group;
   },
@@ -101,7 +100,7 @@ export const categories = {
     return findById(db.categories, id);
   },
   create(data: Omit<ExpenseCategory, "id">): ExpenseCategory {
-    const category: ExpenseCategory = { id: createId(), ...data };
+    const category: ExpenseCategory = { ...data, id: createId() };
     db.categories.push(category);
     return category;
   },
@@ -126,7 +125,7 @@ export const expenses = {
     return db.expenses.filter((e) => e.groupId === groupId);
   },
   create(data: Omit<Expense, "id" | "createdAt">): Expense {
-    const expense: Expense = { id: createId(), createdAt: now(), ...data };
+    const expense: Expense = { ...data, id: createId(), createdAt: now() };
     db.expenses.push(expense);
     return expense;
   },
@@ -138,22 +137,22 @@ export const expenses = {
   },
 };
 
-// ─── Settlements ─────────────────────────────────────────
+// ─── Payments ─────────────────────────────────────────
 
-export const settlements = {
-  getAll(): Settlement[] {
-    return db.settlements;
+export const payments = {
+  getAll(): Payment[] {
+    return db.payments;
   },
-  getByGroup(groupId: string): Settlement[] {
-    return db.settlements.filter((s) => s.groupId === groupId);
+  getByGroup(groupId: string): Payment[] {
+    return db.payments.filter((s) => s.groupId === groupId);
   },
-  create(data: Omit<Settlement, "id" | "createdAt">): Settlement {
-    const settlement: Settlement = { id: createId(), createdAt: now(), ...data };
-    db.settlements.push(settlement);
-    return settlement;
+  create(data: Omit<Payment, "id" | "createdAt">): Payment {
+    const payment: Payment = { ...data, id: createId(), createdAt: now() };
+    db.payments.push(payment);
+    return payment;
   },
   delete(id: string): boolean {
-    return removeById(db.settlements, id);
+    return removeById(db.payments, id);
   },
 };
 
@@ -176,7 +175,7 @@ export function calculateBalances(groupId: string): Record<string, number> | nul
     }
   }
 
-  for (const s of settlements.getByGroup(groupId)) {
+  for (const s of payments.getByGroup(groupId)) {
     balances[s.fromUser] += s.amount;
     balances[s.toUser] -= s.amount;
   }

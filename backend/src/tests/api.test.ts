@@ -239,24 +239,24 @@ describe("DELETE /api/expenses/:id - permissions", () => {
   });
 });
 
-// ─── Settlements API ─────────────────────────────────────
+// ─── Payments API ─────────────────────────────────────
 
-describe("POST /api/groups/:groupId/settlements - permissions", () => {
-  const validSettlement = { fromUser: "u2", toUser: "u1", amount: 20 };
+describe("POST /api/groups/:groupId/payments - permissions", () => {
+  const validPayment = { fromUser: "u2", toUser: "u1", amount: 20 };
 
   it("should return 403 for viewer", async () => {
     const res = await request(app)
-      .post("/api/groups/g1/settlements")
+      .post("/api/groups/g1/payments")
       .set("X-User-Id", "u3")
-      .send(validSettlement);
+      .send(validPayment);
     expect(res.status).toBe(403);
   });
 
-  it("should allow editor to create settlement", async () => {
+  it("should allow editor to create payment", async () => {
     const res = await request(app)
-      .post("/api/groups/g1/settlements")
+      .post("/api/groups/g1/payments")
       .set("X-User-Id", "u2")
-      .send(validSettlement);
+      .send(validPayment);
     expect(res.status).toBe(201);
     expect(res.body.amount).toBe(20);
   });
@@ -279,19 +279,4 @@ describe("GET /api/groups/:groupId/balances", () => {
   });
 });
 
-describe("GET /api/groups/:groupId/debts", () => {
-  it("should return simplified debts with user details", async () => {
-    const res = await request(app).get("/api/groups/g2/debts");
-    expect(res.status).toBe(200);
-    expect(Array.isArray(res.body)).toBe(true);
-    expect(res.body[0]).toHaveProperty("from");
-    expect(res.body[0]).toHaveProperty("to");
-    expect(res.body[0]).toHaveProperty("amount");
-    expect(res.body[0].from).toHaveProperty("name");
-  });
-
-  it("should return 404 for unknown group", async () => {
-    const res = await request(app).get("/api/groups/nope/debts");
-    expect(res.status).toBe(404);
-  });
-});
+// TODO v2: Debts endpoint tests

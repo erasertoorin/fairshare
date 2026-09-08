@@ -1,4 +1,4 @@
-import type { Database } from "./models.js";
+import { GroupRole, type Database } from "./models.js";
 
 export const seedData: Database = {
   users: [
@@ -26,9 +26,9 @@ export const seedData: Database = {
       name: "WG Alexanderplatz",
       description: "Shared flat expenses",
       members: [
-        { userId: "u1", role: "admin" },
-        { userId: "u2", role: "editor" },
-        { userId: "u3", role: "viewer" },
+        { userId: "u1", role: GroupRole.ADMIN },
+        { userId: "u2", role: GroupRole.EDITOR },
+        { userId: "u3", role: GroupRole.VIEWER },
       ],
       createdAt: "2026-08-01T10:00:00Z",
     },
@@ -37,10 +37,10 @@ export const seedData: Database = {
       name: "Urlaub Mallorca 2026",
       description: "Holiday trip expenses",
       members: [
-        { userId: "u1", role: "admin" },
-        { userId: "u2", role: "admin" },
-        { userId: "u3", role: "editor" },
-        { userId: "u4", role: "viewer" },
+        { userId: "u1", role: GroupRole.ADMIN },
+        { userId: "u2", role: GroupRole.ADMIN },
+        { userId: "u3", role: GroupRole.EDITOR },
+        { userId: "u4", role: GroupRole.VIEWER },
       ],
       createdAt: "2026-08-15T14:00:00Z",
     },
@@ -55,7 +55,7 @@ export const seedData: Database = {
       currency: "EUR",
       paidBy: "u1",
       splitBetween: ["u1", "u2", "u3"],
-      splitType: "equal",
+
       categoryId: "cat2",
       date: "2026-08-20T18:30:00Z",
       createdAt: "2026-08-20T18:30:00Z",
@@ -68,7 +68,7 @@ export const seedData: Database = {
       currency: "EUR",
       paidBy: "u2",
       splitBetween: ["u1", "u2", "u3"],
-      splitType: "equal",
+
       categoryId: "cat3",
       date: "2026-08-22T09:00:00Z",
       createdAt: "2026-08-22T09:00:00Z",
@@ -81,7 +81,7 @@ export const seedData: Database = {
       currency: "EUR",
       paidBy: "u3",
       splitBetween: ["u1", "u2", "u3"],
-      splitType: "equal",
+
       categoryId: "cat4",
       date: "2026-08-25T11:00:00Z",
       createdAt: "2026-08-25T11:00:00Z",
@@ -94,7 +94,7 @@ export const seedData: Database = {
       currency: "EUR",
       paidBy: "u1",
       splitBetween: ["u1", "u2", "u3", "u4"],
-      splitType: "equal",
+
       categoryId: "cat5",
       date: "2026-08-16T08:00:00Z",
       createdAt: "2026-08-16T08:00:00Z",
@@ -107,7 +107,7 @@ export const seedData: Database = {
       currency: "EUR",
       paidBy: "u2",
       splitBetween: ["u1", "u2", "u3", "u4"],
-      splitType: "equal",
+
       categoryId: "cat6",
       date: "2026-08-17T15:00:00Z",
       createdAt: "2026-08-17T15:00:00Z",
@@ -120,7 +120,7 @@ export const seedData: Database = {
       currency: "EUR",
       paidBy: "u3",
       splitBetween: ["u1", "u2", "u3", "u4"],
-      splitType: "equal",
+
       categoryId: "cat5",
       date: "2026-08-18T10:00:00Z",
       createdAt: "2026-08-18T10:00:00Z",
@@ -133,14 +133,14 @@ export const seedData: Database = {
       currency: "EUR",
       paidBy: "u4",
       splitBetween: ["u1", "u2", "u3", "u4"],
-      splitType: "equal",
+
       categoryId: "cat7",
       date: "2026-08-19T20:00:00Z",
       createdAt: "2026-08-19T20:00:00Z",
     },
   ],
 
-  settlements: [
+  payments: [
     {
       id: "s1",
       groupId: "g1",
