@@ -1,0 +1,22 @@
+mat-form-field {
+  width: 100%;
+}
+
+.paid-by-info {
+  margin: 8px 0 16px;
+  color: #666;
+}
+
+.split-section {
+  margin-top: 8px;
+
+  p {
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+
+  mat-checkbox {
+    display: block;
+    margin-bottom: 4px;
+  }
+}

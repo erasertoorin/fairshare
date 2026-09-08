@@ -1,0 +1,43 @@
+<div class="login-container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>FairShare</mat-card-title>
+      <mat-card-subtitle>Gruppenausgaben fair teilen</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <mat-tab-group>
+        <mat-tab label="Login">
+          <div class="tab-content">
+            <p>Einloggen als:</p>
+            <mat-list>
+              @for (user of users; track user.id) {
+                <mat-list-item (click)="loginAs(user)" class="user-item">
+                  <div class="avatar" [style.background-color]="user.avatarColor" matListItemIcon>
+                    {{ user.name.charAt(0) }}
+                  </div>
+                  <span matListItemTitle>{{ user.name }}</span>
+                  <span matListItemLine>{{ user.email }}</span>
+                </mat-list-item>
+              }
+            </mat-list>
+          </div>
+        </mat-tab>
+        <mat-tab label="Registrieren">
+          <div class="tab-content">
+            <mat-form-field appearance="outline">
+              <mat-label>Name</mat-label>
+              <input matInput [(ngModel)]="registerName" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>E-Mail</mat-label>
+              <input matInput type="email" [(ngModel)]="registerEmail" />
+            </mat-form-field>
+            <button mat-raised-button color="primary" (click)="register()" [disabled]="!registerName || !registerEmail">
+              Registrieren
+            </button>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </mat-card-content>
+  </mat-card>
+</div>

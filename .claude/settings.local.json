@@ -3,7 +3,8 @@
     "allow": [
       "Bash(node -e \"import\\(''./db.js''\\).then\\(m => { console.log\\(''Users:'', m.users.getAll\\(\\).length\\); console.log\\(''Groups:'', m.groups.getAll\\(\\).length\\); console.log\\(''Expenses:'', m.expenses.getAll\\(\\).length\\); const b = m.calculateBalances\\(''g1''\\); console.log\\(''Balances WG:'', b\\); const d = m.simplifyDebts\\(''g1''\\); console.log\\(''Debts WG:'', d\\); }\\)\")",
       "Bash(npm install:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(npx ng:*)"
     ]
   }
 }

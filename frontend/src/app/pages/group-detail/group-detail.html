@@ -1,0 +1,109 @@
+@if (group) {
+  <div class="group-detail">
+    <div class="header">
+      <button mat-icon-button (click)="goBack()">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div>
+        <h1>{{ group.name }}</h1>
+        <p class="description">{{ group.description }}</p>
+      </div>
+      <span class="spacer"></span>
+      <button mat-fab color="primary" (click)="openAddExpense()">
+        <mat-icon>add</mat-icon>
+      </button>
+    </div>
+
+    <mat-tab-group>
+      <!-- Balances Tab -->
+      <mat-tab label="Salden">
+        <div class="tab-content">
+          <mat-card>
+            <mat-card-content>
+              <mat-list>
+                @for (b of balances; track b.user.id) {
+                  <mat-list-item>
+                    <div class="avatar" [style.background-color]="b.user.avatarColor" matListItemIcon>
+                      {{ b.user.name.charAt(0) }}
+                    </div>
+                    <span matListItemTitle>{{ b.user.name }}</span>
+                    <span matListItemLine [class.positive]="b.balance > 0" [class.negative]="b.balance < 0">
+                      @if (b.balance > 0) {
+                        bekommt {{ b.balance | currency:'EUR' }}
+                      } @else if (b.balance < 0) {
+                        schuldet {{ -b.balance | currency:'EUR' }}
+                      } @else {
+                        ausgeglichen
+                      }
+                    </span>
+                  </mat-list-item>
+                }
+              </mat-list>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+      <!-- Expenses Tab -->
+      <mat-tab label="Ausgaben">
+        <div class="tab-content">
+          @if (expenses.length === 0) {
+            <mat-card class="empty-state">
+              <mat-card-content>
+                <p>Noch keine Ausgaben in dieser Gruppe.</p>
+              </mat-card-content>
+            </mat-card>
+          }
+
+          @for (expense of expenses; track expense.id) {
+            <mat-card class="expense-card">
+              <mat-card-header>
+                <mat-icon matCardAvatar>{{ getCategoryIcon(expense.categoryId) }}</mat-icon>
+                <mat-card-title>{{ expense.description }}</mat-card-title>
+                <mat-card-subtitle>
+                  {{ getUserName(expense.paidBy) }} hat bezahlt &middot; {{ expense.date | date:'dd.MM.yyyy' }}
+                </mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="expense-details">
+                  <span class="amount">{{ expense.amount | currency:'EUR' }}</span>
+                  <span class="split">
+                    {{ getSharePerPerson(expense) | currency:'EUR' }} pro Person
+                    ({{ expense.splitBetween.length }} Personen)
+                  </span>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          }
+        </div>
+      </mat-tab>
+
+      <!-- Members Tab -->
+      <mat-tab label="Mitglieder">
+        <div class="tab-content">
+          <mat-card>
+            <mat-card-content>
+              <mat-list>
+                @for (m of group.memberDetails; track m.userId) {
+                  <mat-list-item>
+                    <div class="avatar" [style.background-color]="m.user.avatarColor" matListItemIcon>
+                      {{ m.user.name.charAt(0) }}
+                    </div>
+                    <span matListItemTitle>{{ m.user.name }}</span>
+                    <span matListItemLine>
+                      @switch (m.role) {
+                        @case (3) { Admin }
+                        @case (2) { Editor }
+                        @case (1) { Viewer }
+                      }
+                    </span>
+                  </mat-list-item>
+                }
+              </mat-list>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+}

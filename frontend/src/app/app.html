@@ -1,0 +1,17 @@
+@if (auth.isLoggedIn()) {
+  <mat-toolbar color="primary">
+    <button mat-icon-button routerLink="/dashboard">
+      <mat-icon>account_balance_wallet</mat-icon>
+    </button>
+    <span>FairShare</span>
+    <span class="spacer"></span>
+    <span class="user-name">{{ auth.currentUser()?.name }}</span>
+    <button mat-icon-button (click)="logout()">
+      <mat-icon>logout</mat-icon>
+    </button>
+  </mat-toolbar>
+}
+
+<main>
+  <router-outlet />
+</main>
