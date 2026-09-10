@@ -3,6 +3,7 @@
 Gruppenausgaben fair teilen — eine Splitwise-ähnliche Web-App zum Tracken und Aufteilen von gemeinsamen Ausgaben.
 
 **[Roadmap & Feature-Übersicht](https://claude.ai/code/artifact/6b65264f-9298-4e5c-8318-ea71d25649fb)**
+**[Fairshare Entwicklungsprotokoll](https://claude.ai/code/artifact/8d15b60b-ec44-4e55-b235-7b2d68f9c6a1)**
 
 ## Tech Stack
 
