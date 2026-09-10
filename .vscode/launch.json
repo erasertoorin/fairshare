@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Debug Backend",
+            "skipFiles": ["<node_internals>/**"],
+            "runtimeExecutable": "${workspaceFolder}/backend/node_modules/.bin/tsx",
+            "args": ["src/server.ts"],
+            "cwd": "${workspaceFolder}/backend",
+            "console": "integratedTerminal",
+            "restart": true
+        }
+    ]
+}
